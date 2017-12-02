@@ -1,11 +1,12 @@
 var ctx = document.getElementById("myChart");
+var dataValues = [12, 19, 3, 5, 2, 3];
 var myChart = new Chart(ctx, {
     type: 'line',
     data: {
         labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
         datasets: [{
             label: '# of Votes',
-            data: [12, 19, 3, 5, 2, 3],
+            data: dataValues,
             backgroundColor: [
                 'rgba(255, 99, 132, 0.2)',
                 'rgba(54, 162, 235, 0.2)',
@@ -35,3 +36,8 @@ var myChart = new Chart(ctx, {
         }
     }
 });
+
+function getData() {
+    dataValues.push(12);
+    console.log(dataValues);
+}
