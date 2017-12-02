@@ -54,3 +54,8 @@ function getData() {
     canvasEle.clearRect(0, 0, 1000, 1000);
     mychart = buildChart();
 }
+
+var number = 0;
+async function updateVar() {
+    
+}

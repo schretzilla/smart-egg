@@ -1,0 +1,48 @@
+<html>
+    <header>
+      <link rel="stylesheet" href="../simple-grid.min.css">
+      <script src="https://code.highcharts.com/stock/highstock.js"></script>
+      <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+      
+      <!-- <script src="https://code.highcharts.com/highcharts.js"></script>
+      <script src="https://code.highcharts.com/modules/series-label.js"></script>
+      <script src="https://code.highcharts.com/modules/exporting.js"></script>     -->
+    </header>
+
+    <style>
+    #myChart {
+	min-width: 310px;
+	max-width: 800px;
+	height: 400px;
+	margin: 0 auto
+}
+</style>
+    <body>
+      <div class="container">
+  
+        <div class="row">
+          <div class="col-12">
+            <h1>Smart Egg High Chart</h1>
+            
+            <!-- Btn Row -->
+            <div class="row">
+              <div class="col-6">
+                <button onclick="getData">Get Data</button>
+              </div>
+            </div>
+          </div>
+        </div> <!-- End header row -->
+  
+        <div class="row">
+          <div class="col-12">
+  
+              <!-- <canvas id="myChart" width="400" height="400"></canvas>						 -->
+              <div id="container"></div>
+          </div>
+        </div> <!-- End Canvas Row -->
+  
+      </div> <!-- End Container -->
+    </body>
+  
+    <script src="charting.js"></script>
+  </html>
