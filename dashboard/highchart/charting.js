@@ -6,7 +6,16 @@ Highcharts.setOptions({
 });
 
 var chart; //global chart
+var refreshIntervalId; // used to stop recording
 
+function destory() {
+    clearInterval(refreshIntervalId);
+    while(chart.series.length > 0 ){
+        chart.series[0].remove(true);
+    }
+}
+
+// Start recording random data to chart
 function record() {
     chart = new Highcharts.stockChart('myChart', {
         chart: {
@@ -14,20 +23,18 @@ function record() {
             defaultSeriesType: 'spline',
             events: {
                 load: function () {
-    
                     // set up the updating of the chart each second
                     var series = this.series[0];
-                    setInterval(function () {
+                    refreshIntervalId = setInterval(function () {                        
                         var x = (new Date()).getTime(), // current time
                             y = Math.round(Math.random() * 100);
-                        series.addPoint([x, y], true, true);
-                        // console.log(series);                    
+                        series.addPoint([x, y], true, false); // false to stop dropping of earlier data
                     }, 1000);
                 }
             }
         },
         title: {
-            text: 'Live random data'
+            text: 'Egg Acceleration Data'
         },
         xAxis: {
             type: 'datetime',
@@ -59,21 +66,8 @@ function record() {
               enabled: false
           },
         series: [{
-            name: 'Random data',
-            data: (function () {
-                  // generate an array of random data
-                  var data = [],
-                      time = (new Date()).getTime(),
-                      i;
-        
-                  for (i = -999; i <= 0; i += 1) {
-                      data.push([
-                          time + i * 1000,
-                          Math.round(Math.random() * 100)
-                      ]);
-                  }
-                  return data;
-              }())
+            name: 'Acceleration data',
+            data: [] //data to load
             }]
       }
     )};         
