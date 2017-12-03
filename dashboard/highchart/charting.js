@@ -6,9 +6,9 @@ Highcharts.setOptions({
 });
 
 var chart; //global chart
-Highcharts.stockChart('container', {
+Highcharts.stockChart('myChart', {
     chart: {
-        renderTo: 'container',
+        renderTo: 'myChart',
         defaultSeriesType: 'spline',
         events: {
             load: function () {
@@ -74,21 +74,3 @@ Highcharts.stockChart('container', {
           }())
         }]
   });        
-
-
-// Create the chart
-// Highcharts.stockChart('container', {
-//   chart: {
-//       events: {
-//           load: function () {
-
-//               // set up the updating of the chart each second
-//               var series = this.series[0];
-//               setInterval(function () {
-//                   var x = (new Date()).getTime(), // current time
-//                       y = Math.round(Math.random() * 100);
-//                   series.addPoint([x, y], true, true);
-//               }, 1000);
-//           }
-//       }
-//   },
