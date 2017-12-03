@@ -8,11 +8,17 @@ Highcharts.setOptions({
 var chart; //global chart
 var refreshIntervalId; // used to stop recording
 
+// Stop recording and clear the chart
 function destory() {
     clearInterval(refreshIntervalId);
     while(chart.series.length > 0 ){
         chart.series[0].remove(true);
     }
+}
+
+//Stop recording
+function stop() {
+    clearInterval(refreshIntervalId);    
 }
 
 // Start recording random data to chart
