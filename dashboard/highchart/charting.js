@@ -7,6 +7,7 @@ Highcharts.setOptions({
 
 var chart; //global chart
 var refreshIntervalId; // used to stop recording
+$("#stop").hide();
 
 // Stop recording and clear the chart
 function destory() {
@@ -18,62 +19,79 @@ function destory() {
 
 //Stop recording
 function stop() {
-    clearInterval(refreshIntervalId);    
+    $("#record").show();
+    $("#stop").hide();
+
+    //Stop the recrodign interval
+    clearInterval(refreshIntervalId);   
+    
+    //Pull last data and display chart
+    testData = [43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175]
+    buildChart(testData);
 }
 
 // Start recording random data to chart
 function record() {
-    chart = new Highcharts.stockChart('myChart', {
-        chart: {
-            renderTo: 'myChart',
-            defaultSeriesType: 'spline',
-            events: {
-                load: function () {
-                    // set up the updating of the chart each second
-                    var series = this.series[0];
-                    refreshIntervalId = setInterval(function () {                        
-                        var x = (new Date()).getTime(), // current time
-                            y = Math.round(Math.random() * 100);
-                        series.addPoint([x, y], true, false); // false to stop dropping of earlier data
-                    }, 1000);
-                }
-            }
-        },
-        title: {
-            text: 'Egg Acceleration Data'
-        },
-        xAxis: {
-            type: 'datetime',
-            tickPixelInterval: 150,
-            maxZoom: 20 * 1000,
-            range: 100
-        },
-        yAxis: {
-            minPadding: 0.2,
-            maxPadding: 0.2,
+    // switch buttons while recording
+    $("#record").hide();
+    $("#stop").show();
+
+    //Start pulling live data
+
+}         
+
+function buildChart(resultData) {
+    Highcharts.chart('container', {
+            chart: {
+                zoomType: 'x'
+            },
             title: {
-                text: 'Value',
-                margin: 30
-            }
-        },
-        rangeSelector: {
-          buttons: [{
-              count: 1,
-              type: 'minute',
-              text: '1M'
-          }, {
-              type: 'all',
-              text: 'All'
-          }],
-          inputEnabled: false,
-          selected: 0
-      },
-      exporting: {
-              enabled: false
-          },
-        series: [{
-            name: 'Acceleration data',
-            data: [] //data to load
+                text: 'Smart Egg Acceleration'
+            },
+        
+            subtitle: {
+                text: 'Team: [Team Name]'
+            },
+        
+            yAxis: {
+                title: {
+                    text: 'Acceleration'
+                }
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'middle'
+            },
+        
+            plotOptions: {
+                series: {
+                    label: {
+                        connectorAllowed: false
+                    },
+                    pointStart: 1
+                }
+            },
+        
+            series: [{
+                name: 'Installation',
+                data: resultData
+            }],
+        
+            responsive: {
+                rules: [{
+                    condition: {
+                        maxWidth: 500
+                    },
+                    chartOptions: {
+                        legend: {
+                            layout: 'horizontal',
+                            align: 'center',
+                            verticalAlign: 'bottom'
+                        }
+                    }
+               
             }]
-      }
-    )};         
+        }
+    });
+}
