@@ -14,34 +14,38 @@ function stop() {
 
     //Save chart to list
     let dropName = "Drop #"+dropId;
-    let eggDrop = {name: dropName, chart: currentChart };
+    let chartDataPlots = currentChart.series[0].yData;
+    let eggDrop = {name: dropName, chartData: chartDataPlots};
     dropList.push(eggDrop);
     $("#drop-history").append('<li> <button onClick="newDataSelected('+dropId+')">'+dropName+'</button></li>');
     dropId += 1;
 }
 
+// Redraw the chart with the data stored in the selected data list
 function newDataSelected(id) {
     console.log(dropList[id]);
-    selectedChart = dropList[id].chart;
+    selectedData = dropList[id].chartData;
     // currentChart = buildChart(selectedChart.series[0].YData);
-    currentChart.series[0].setData(selectedChart.series[0].yData, true);
-    currentChart = selectedChart;
+    console.log(selectedData);
+    currentChart.series[0].setData(selectedData, true);
+    //currentChart = selectedChart;
 }
 
-// Start recording random data to chart
+// Start recording data to chart
+// TODO: replace random data with data retrieved from ESP32
 function record() {
     // switch buttons while recording
     $("#record").hide();
     $("#stop").show();
 
-    //Start pulling live data
+    //Start pulling  data
     let streamIndex = 0; // Index of last number added to chart
     let dataList = [];
     currentChart = buildChart(dataList); // build empty chart initially
-    let timeBetweenDataPull = 1000;
+    let timeBetweenDataPull = 1000; // Time to wait until next pull of data
     dataStreamInterval = setInterval(function() {
-        let randomDataList = getRandomNumbersToAdd();
-        dataList = dataList.concat(randomDataList); // append new data (simulates the addition of data to the stream)
+        let randomDataList = getRandomNumbersToAdd();  // TODO: Replace with getter of real data
+        dataList = dataList.concat(randomDataList); // append new data to the data list
         streamIndex = addPointsToChart(currentChart, dataList, streamIndex);  // move the cur index to include the newly aded values        
         
         //TODO shift x axis as data comes in, only show the last x amount of points
