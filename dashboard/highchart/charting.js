@@ -41,6 +41,7 @@ function record() {
         let randomDataList = getRandomNumbersToAdd();
         dataList = dataList.concat(randomDataList); // append new data (simulates the addition of data to the stream)
         streamIndex = addPointsToChart(chart, dataList, streamIndex);  // move the cur index to include the newly aded values        
+        chart.shift
     }, timeBetweenDataPull);
         
 }         
@@ -52,7 +53,7 @@ function streamData() {
 function addPointsToChart(chart, dataToAdd, curIndex){
     for(curIndex; curIndex < dataToAdd.length; curIndex++){
         let curValue = dataToAdd[curIndex];
-        chart.series[0].addPoint(curValue);
+        chart.series[0].addPoint(curValue, true, false);
     }
     return curIndex;
 }
@@ -78,10 +79,7 @@ function buildChart(resultData) {
             subtitle: {
                 text: 'Team: [Team Name]'
             },
-            xAxis: {
-                min:0,
-                max:100
-            },
+
             yAxis: {
                 title: {
                     text: 'Acceleration'
@@ -92,7 +90,6 @@ function buildChart(resultData) {
                 align: 'right',
                 verticalAlign: 'middle'
             },
-        
             plotOptions: {
                 series: {
                     label: {
