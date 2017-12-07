@@ -1,7 +1,9 @@
 var currentChart; //current chart
 var dataStreamInterval; // used to stop recording
 let dropList = []; //list of egg drop objects 
+let dropDataList = []; // list of data 
 let dropId = 0; // A sad way to handle data binding
+let curDataList;
 $("#stop").hide();
 
 //Stop recording
@@ -14,8 +16,9 @@ function stop() {
 
     //Save chart to list
     let dropName = "Drop #"+dropId;
-    let chartDataPlots = currentChart.series[0].yData;
-    let eggDrop = {name: dropName, chartData: chartDataPlots};
+    dropDataList.push(curDataList);
+    console.log(dropDataList);
+    let eggDrop = {name: dropName, chartData: currentChart.series[0].yData };
     dropList.push(eggDrop);
     $("#drop-history").append('<li> <button onClick="newDataSelected('+dropId+')">'+dropName+'</button></li>');
     dropId += 1;
@@ -24,7 +27,8 @@ function stop() {
 // Redraw the chart with the data stored in the selected data list
 function newDataSelected(id) {
     console.log(dropList[id]);
-    selectedData = dropList[id].chartData;
+    // selectedData = dropList[id].chartData;
+    selectedData = dropDataList[id];
     // currentChart = buildChart(selectedChart.series[0].YData);
     console.log(selectedData);
     currentChart.series[0].setData(selectedData, true);
@@ -40,13 +44,13 @@ function record() {
 
     //Start pulling  data
     let streamIndex = 0; // Index of last number added to chart
-    let dataList = [];
-    currentChart = buildChart(dataList); // build empty chart initially
+    curDataList = [];
+    currentChart = buildChart(curDataList); // build empty chart initially
     let timeBetweenDataPull = 1000; // Time to wait until next pull of data
     dataStreamInterval = setInterval(function() {
         let randomDataList = getRandomNumbersToAdd();  // TODO: Replace with getter of real data
-        dataList = dataList.concat(randomDataList); // append new data to the data list
-        streamIndex = addPointsToChart(currentChart, dataList, streamIndex);  // move the cur index to include the newly aded values        
+        curDataList = curDataList.concat(randomDataList); // append new data to the data list
+        streamIndex = addPointsToChart(currentChart, curDataList, streamIndex);  // move the cur index to include the newly aded values        
         
         //TODO shift x axis as data comes in, only show the last x amount of points
         // currentChart.shift; //shift axis as data comes in
@@ -62,7 +66,7 @@ function record() {
 function addPointsToChart(chart, dataToAdd, curIndex){
     for(curIndex; curIndex < dataToAdd.length; curIndex++){
         let curValue = dataToAdd[curIndex];
-        chart.series[0].addPoint(curValue, true, false);
+        //chart.series[0].addPoint(curValue, true, false);
     }
     return curIndex;
 }
@@ -71,7 +75,7 @@ function addPointsToChart(chart, dataToAdd, curIndex){
 // to the chart
 function getRandomNumbersToAdd(){
     let randomDataList = [];
-    for(let i=0; i<10; i++){
+    for(let i=0; i<1000; i++){
         let randNumber = Math.floor(Math.random() * 100);
         randomDataList.push(randNumber);
     }
@@ -81,8 +85,9 @@ function getRandomNumbersToAdd(){
 // Builds a line chart for the supplied y data array
 // ResultData: The y values of the line chart
 function buildChart(resultData) {
-    var chart = Highcharts.chart('container', {
+    let chart = Highcharts.chart('container', {
             chart: {
+                type: 'line',
                 zoomType: 'x'
             },
             title: {
