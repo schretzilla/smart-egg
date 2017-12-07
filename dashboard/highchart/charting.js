@@ -1,9 +1,12 @@
+// Handles charting the data points 
+
 var currentChart; //current chart
 var dataStreamInterval; // used to stop recording
 let dropList = []; //list of egg drop objects 
-let dropDataList = []; // list of data 
 let dropId = 0; // A sad way to handle data binding
-let curDataList;
+let curDataList; // This current list of data in focus
+
+// Hide the stop button on load
 $("#stop").hide();
 
 //Stop recording
@@ -16,9 +19,7 @@ function stop() {
 
     //Save chart to list
     let dropName = "Drop #"+dropId;
-    dropDataList.push(curDataList);
-    console.log(dropDataList);
-    let eggDrop = {name: dropName, chartData: currentChart.series[0].yData };
+    let eggDrop = {name: dropName, chartData: curDataList };
     dropList.push(eggDrop);
     $("#drop-history").append('<li> <button onClick="newDataSelected('+dropId+')">'+dropName+'</button></li>');
     dropId += 1;
@@ -26,19 +27,15 @@ function stop() {
 
 // Redraw the chart with the data stored in the selected data list
 function newDataSelected(id) {
-    console.log(dropList[id]);
-    // selectedData = dropList[id].chartData;
-    selectedData = dropDataList[id];
-    // currentChart = buildChart(selectedChart.series[0].YData);
-    console.log(selectedData);
+    console.log(dropList[id].name);
+    selectedData = dropList[id].chartData;
     currentChart.series[0].setData(selectedData, true);
-    //currentChart = selectedChart;
 }
 
 // Start recording data to chart
 // TODO: replace random data with data retrieved from ESP32
 function record() {
-    // switch buttons while recording
+    // Toggle buttons while recording
     $("#record").hide();
     $("#stop").show();
 
@@ -47,13 +44,14 @@ function record() {
     curDataList = [];
     currentChart = buildChart(curDataList); // build empty chart initially
     let timeBetweenDataPull = 1000; // Time to wait until next pull of data
+
+    // Add random points until stop is clicked
     dataStreamInterval = setInterval(function() {
         let randomDataList = getRandomNumbersToAdd();  // TODO: Replace with getter of real data
         curDataList = curDataList.concat(randomDataList); // append new data to the data list
-        streamIndex = addPointsToChart(currentChart, curDataList, streamIndex);  // move the cur index to include the newly aded values        
         
-        //TODO shift x axis as data comes in, only show the last x amount of points
-        // currentChart.shift; //shift axis as data comes in
+        // Where a live stream would go but handling more than 100 pts at a time can't be done fast enough
+        // streamIndex = addPointsToChart(currentChart, dataList, streamIndex);  // move the cur index to include the newly aded values             
     }, timeBetweenDataPull);
         
 }         
@@ -66,7 +64,7 @@ function record() {
 function addPointsToChart(chart, dataToAdd, curIndex){
     for(curIndex; curIndex < dataToAdd.length; curIndex++){
         let curValue = dataToAdd[curIndex];
-        //chart.series[0].addPoint(curValue, true, false);
+        chart.series[0].addPoint(curValue, true, false);
     }
     return curIndex;
 }
@@ -97,7 +95,13 @@ function buildChart(resultData) {
             subtitle: {
                 text: 'Team: [Team Name]'
             },
-
+            scrollbar: {
+                enabled: true
+            },
+            xAxis: {
+                max: 500    //Set the max points in the view
+                            //TODO: Set scroll bar to far right
+            },
             yAxis: {
                 title: {
                     text: 'Acceleration'
@@ -116,7 +120,6 @@ function buildChart(resultData) {
                     pointStart: 1
                 }
             },
-        
             series: [{
                 name: 'Installation',
                 data: resultData
