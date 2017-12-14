@@ -1,0 +1,83 @@
+<html>
+    <header>
+      <link rel="stylesheet" href="../simple-grid.min.css">
+      <script src="./jquery.min.js"></script>
+      <script src="./highstockchart.min.js"></script>
+    </header>
+
+    <style>
+    #container {
+	min-width: 600px;
+	max-width: 800px;
+	height: 400px;
+	margin: 0 auto
+}
+
+.btn-group .button {
+    background-color: #4CAF50; /* Green */
+    border: 1px solid green;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+    float: left;
+}
+.btn-group .button:not(:last-child) {
+    border-right: none; /* Prevent double borders */
+}
+.btn-group .button:hover {
+    background-color: #3e8e41;
+}
+
+</style>
+    <body>
+      <div class="container">
+  
+        <div class="row">
+          <div class="col-12">
+            <h1>Smart Egg High Chart</h1>
+            
+            <!-- Btn Row -->
+            <div class="row">
+              <div class="col-3"> 
+                <!-- Left Btn Div -->
+              </div>
+              <div class="col-6">
+                <!-- <button onclick="getData()">Get Data</button> -->
+
+                <div class="btn-group">
+                    <button id="record" onclick="record()" class="button">Record New</button>
+                    <button id="stop" onclick="stop()" class="button">Stop</button>                    
+                  </div>
+
+              </div>
+
+              <div class="col-3">
+                <!-- Right Btn Div -->
+              </div>
+
+            </div>
+          </div>
+        </div> <!-- End header row -->
+  
+        <div class="row">
+          <div class="col-2">
+            <!-- List of saved charts -->
+            <ul id="drop-history">
+
+            </ul>
+          </div>
+          <div class="col-10">
+            <!-- Charting section -->
+            <div id="container"></div>
+          </div>
+        </div> <!-- End Canvas Row -->
+  
+      </div> <!-- End Container -->
+    </body>
+  
+    <script src="charting.js"></script>
+  </html>
