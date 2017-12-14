@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+
+<html>
+  <head>
+  <title>Digital Egg Drop Page</title>
+  <!-- <script src="./scripts.js"></script> -->
+  <script src="./highchart.min.js"></script>
+  
+  </head>
+  <body>
+    <h1>Welcome to the drop page!</h1>
+    <div>
+      <button type="button" onclick="startRecord()">Start Recording</button>
+      <button type="button" onclick="stopRecord()">Stop Recording</button>
+      <button type="button" onclick="getData()">Get Data</button>
+    </div>
+    
+    <div id="container">
+      <!-- Chart here -->
+    </div>   
+
+    <table>
+      <tr>
+        <th>Axis</th>
+        <th>Raw</th>
+      <tr>
+        <th>x</th>
+        <th id="rawX">0.0</th>
+      </tr>
+      <tr>
+        <th>y</th>
+        <th id="rawY">0.0</th>
+      </tr>
+      <tr>
+        <th>z</th>
+        <th id="rawZ">0.0</th>
+      </tr>
+    </table>
+  </body>
+</html>
