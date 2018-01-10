@@ -21,7 +21,7 @@ function stop() {
     let dropName = "Drop #"+dropId;
     let eggDrop = {name: dropName, chartData: curDataList };
     dropList.push(eggDrop);
-    $("#drop-history").append('<li> <button onClick="newDataSelected('+dropId+')">'+dropName+'</button></li>');
+    $("#drop-history").append('<li> <a onClick="newDataSelected('+dropId+')">'+dropName+'</a></li>');
     dropId += 1;
 }
 

@@ -2,13 +2,19 @@
 //TODO: Put into on load complete method
 // Hide the stop button on load
 $("#stop").hide();
+$("#team-details-container").hide();
+$("#loading-btn").hide();
 
 //TODO: only disable if no runs exist
 $("#downloadBtn").prop("disabled", true);
 
 //List all drops history
-let m_dropList = [];
-updateDropList();
+let m_teamDataList = [];
+let m_currentChart; //Current chart in view
+let m_activeTab; //Index of the active tab
+
+//TODO: update drop list on load
+//updateDropList();
 
 function updateEvents() {
   setInterval(updateTable(), 1000);
@@ -23,16 +29,26 @@ function startRecord() {
 
 }
 
+
 function updateDropList() { 
+    //Get all Drops from API
+    // for each drop, add drop to drop list
+    
+    addTeam("team1");
+    
+}
+
+function addTeam() {
     //Test data
+    //TODO: Pull from API
     curDataList = [10, 15, 22, 33, 5, 6, 33, 2, 67];
     
-    let dropName = $("#drop-name").val();
-    let dropId = m_dropList.length;
-    dropName = "Drop #"+m_dropList.length;
-    let eggDrop = {name: dropName, chartData: curDataList };
-    m_dropList.push(eggDrop);
-    $("#drop-history").append('<li> <a onClick="newDataSelected('+dropId+')">'+dropName+'</a></li>');
+    let teamName = $("#team-name").val();
+    $("#team-name").val("");
+    let teamId = m_teamDataList.length;
+    let eggDrop = {name: teamName, chartData: curDataList };
+    m_teamDataList.push(eggDrop);
+    $("#drop-history").append('<li id=team-'+teamId+'> <a onClick="newDataSelected('+teamId+')">'+teamName+'</a></li>');
 }
 
 function stopRecord() {
@@ -40,10 +56,28 @@ function stopRecord() {
   $("#record").show();
   $("#stop").hide();
 
+  //TODO: show the loading button while the data is being retireved
+  $("#loading-btn").show();
+
   HTTPRequest("functions/stopRecord()", function(response) {});
 
   // Data is now available to download
   $("#downloadBtn").prop("disabled", false);
+}
+
+function newDataSelected(teamId){
+    //Toggle active tabs
+    $("#team-"+m_activeTab).removeClass("is-active");
+    $("#team-"+teamId).addClass("is-active");
+    m_activeTab = teamId;
+
+    $("#team-details-container").show()
+
+
+    console.log(m_teamDataList[teamId].name);
+    selectedData = m_teamDataList[teamId].chartData;
+    currentChart = buildChart(selectedData)
+    currentChart.series[0].setData(selectedData, true);
 }
 
 function setData(elementID, value) {
