@@ -6,6 +6,9 @@ $("#stop").hide();
 //TODO: only disable if no runs exist
 $("#downloadBtn").prop("disabled", true);
 
+//List all drops history
+let m_dropList = [];
+updateDropList();
 
 function updateEvents() {
   setInterval(updateTable(), 1000);
@@ -18,6 +21,18 @@ function startRecord() {
 
   HTTPRequest("functions/startRecord()", function(response) {});
 
+}
+
+function updateDropList() { 
+    //Test data
+    curDataList = [10, 15, 22, 33, 5, 6, 33, 2, 67];
+    
+    let dropName = $("#drop-name").val();
+    let dropId = m_dropList.length;
+    dropName = "Drop #"+m_dropList.length;
+    let eggDrop = {name: dropName, chartData: curDataList };
+    m_dropList.push(eggDrop);
+    $("#drop-history").append('<li> <a onClick="newDataSelected('+dropId+')">'+dropName+'</a></li>');
 }
 
 function stopRecord() {
