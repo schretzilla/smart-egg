@@ -1,0 +1,108 @@
+<!DOCTYPE HTML>
+
+<html>
+  <head>
+    <title>Digital Egg Drop Page</title>
+    <link rel="stylesheet" href="./font-awesome.min.css">
+    <script src="./jquery.min.js"></script>
+    <script src="./highstockchart.min.js"></script>
+  </head>
+  <style>
+    .custom-container {
+      min-width: 600px;
+      height: 400px;
+      margin: 0 auto;
+      margin-top: 8px;
+      margin-left: 50px;
+      margin-right: 50px;
+    }
+
+
+
+</style>
+
+  <body>
+    <section class="hero is-primary">
+        <div class="hero-body">
+          <div class="container">
+            <h1 class="title">
+              Welcome to the egg drop page!
+            </h1>
+            <h2 class="subtitle">
+              <p>Here is how this currently works...
+                <ul>
+                  <li>1. Select Start Record button</li>
+                  <li>2. Select the Stop Record button, don't wait too long this is kind of slow still </li>
+                  <li>3. Select the show latest chart button</li>
+                </ul>
+              </p>
+            </h2>
+            <h2 class="subtitle">
+              <p> 
+                <button id="record" type="button b" class="button is-success" onclick="startRecord()">Start Recording</button>
+                <button id="stop" type="button" class="button is-danger" onclick="stopRecord()">Stop Recording</button>
+                <button id="downloadBtn" type="submit" class="button is-info" onclick="window.open('rawdata.csv')">Download Last Run</button>  
+              </p>
+            </h2>
+          </div>
+        </div>
+      </section>
+
+        <!-- Table Row -->
+        <div class="custom-container">
+          <div class="columns">
+            <div class="column is-2">
+              <!-- Center column used for instant data -->
+              <button class="button is-link" onclick="updateTable()">Update Table</button> 
+              <table>
+                <tr>
+                  <th>Axis</th>
+                  <th>Raw</th>
+                  <th>gForce</th>
+                </tr>
+                <tr>
+                  <th>x</th>
+                  <th id="rawX">0.0</th>
+                  <th id="gX">0.0</th>
+                </tr>
+                <tr>
+                  <th>y</th>
+                  <th id="rawY">0.0</th>
+                  <th id="gY">0.0</th>
+                </tr>
+                <tr>
+                  <th>z</th>
+                  <th id="rawZ">0.0</th>
+                  <th id="gZ">0.0</th>
+                </tr>
+              </table>
+          </div> <!-- End col for table -->
+
+          <!-- Chart's Column -->
+          <div class="column is-10">
+            <button id="show-latest-btn" type="button" class="button is-primary" onclick="showLatestTable()">Show Latest Chart</button>
+            <!-- Charting section -->
+            <div id="container"></div>
+          </div>
+      </div> <!-- End Table Row -->
+    </div>
+    <div class="row">
+      <div class="col-2">
+        <!-- List of saved charts -->
+        <ul id="drop-history">
+
+        </ul>
+
+      </div>
+      <div class="col-10">
+        
+
+      </div>
+    </div> <!-- End Chart's Row -->
+
+
+
+</body>
+<script src="./scripts.js"></script>
+
+</html>
