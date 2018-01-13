@@ -1,20 +1,22 @@
-//setup
-//TODO: Put into on load complete method
-// Hide the stop button on load
-$("#stop").hide();
-$("#drop-details-container").hide();
-$("#loading-btn").hide();
-
-//TODO: only disable if no runs exist
-$("#download-btn").prop("disabled", true);
-
 //List all drops history
 let m_DropDataList = [];
 let m_currentChart; //Current chart in view
 let m_activeDropId; //Index of the active tab
 
-//TODO: update drop list on load
-//updateDropList();
+$(document).ready(function() {
+	//setup
+	//TODO: Put into on load complete method
+	// Hide the stop button on load
+	$("#stop").hide();
+	$("#loading-btn").hide();
+
+	//TODO: only disable if no runs exist
+	$("#download-btn").prop("disabled", true);
+
+	//TODO: update drop list on load
+	//updateDropList();
+
+});
 
 function updateEvents() {
   setInterval(updateTable(), 1000);
