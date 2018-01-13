@@ -14,7 +14,7 @@ $(document).ready(function() {
 	$("#download-btn").prop("disabled", true);
 
 	//TODO: update drop list on load
-	//updateDropList();
+	updateDropList();
 
 });
 
@@ -51,28 +51,73 @@ function closeModal() {
 		$("#modal-area").val("");
 }
 
+function createDrop(name, valuesArray){
+	return {name: name, chartData: valuesArray};
+}
 
 function updateDropList() { 
-    //Get all Drops from API
-    // for each drop, add drop to drop list
-    
-    addDrop("Drop1");
+	//Get all Drops from API
+	// for each drop, add drop to drop list
+	
+	//TODO: Get drop list
+	let testDropList = [1,2,3,4,5];
+
+	for(let i=0; i<testDropList.length; i++){
+		//Get each name of each drop
+		let name = getDropName(testDropList[i]);
+		let data = getRandomDropData();
+		addDrop(name, data);
+	}	
     
 }
 
-function addDrop() {
+function getRandomDropData(){
+	let dropData = [];
+	for(let i=0; i<140; i++){
+		dropData.push(Math.random() * 100);
+	}
+	return dropData;
+}
+
+// Get Drop name
+function getDropName(id){
+
+	//TODO: Get drop name
+	//HTTPRequest("functions/dropName("+id+")", function(response) {});
+
+	var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  for (var i = 0; i < 5; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return text;
+}
+
+function addDrop(dropName, data) {
+		let eggDrop = {id: m_DropDataList.length, name: dropName, chartData: data };
+		m_DropDataList.push(eggDrop);
+		this.addTab(eggDrop.id, dropName);
+}
+
+// Add a drop to the lsit of tabs
+function addTab(dropId, dropName){
+	$("#drop-history").append('<li id=Drop-'+dropId+'> <a onClick="newDataSelected('+dropId+')">'+dropName+'</a></li>');
+}
+
+// Add a new drop
+function addNewDrop() {
     //Test data
     //TODO: Pull from API
-    curDataList = [10, 15, 22, 33, 5, 6, 33, 2, 67];
+    curDataList = [];
     
-    let DropName = $("#drop-name").val();
+    let dropName = $("#drop-name").val();
     $("#drop-name").val("");
-    let DropId = m_DropDataList.length;
-    let eggDrop = {name: DropName, chartData: curDataList };
-    m_DropDataList.push(eggDrop);
-    $("#drop-history").append('<li id=Drop-'+DropId+'> <a onClick="newDataSelected('+DropId+')">'+DropName+'</a></li>');
+    let dropId = m_DropDataList.length;
+    this.addDrop(dropName, curDataList);
 }
 
+// Builds modal for delete confirmation
 function buildModal() {
 	let dropName = m_DropDataList[m_activeDropId].name;
 	$("#modal-area").append('<div id="my-modal" class="modal">\
