@@ -142,18 +142,31 @@ function buildModal() {
 
 function stopRecord() {
   //Toggle the stop and start buttons
-  $("#record").show();
-  $("#stop").hide();
+  // $("#record").show();
+	$("#stop").hide();
+
+	// Stop Recording
+	HTTPRequest("functions/stopRecord()", function(response) {});
+
 
   //TODO: show the loading button while the data is being retireved
   $("#loading-btn").show();
 
-  HTTPRequest("functions/stopRecord()", function(response) {});
-
+	// TODO: Delete this button put csv onto chart
   // Data is now available to download
-  $("#download-btn").prop("disabled", false);
+	$("#download-btn").prop("disabled", false);
+	
+	//Load the newest data
+	let dataFromDrop = getLastRun();
+
+	// persist the data dropped to the current egg drop object
+	m_DropDataList[m_activeDropId].chartData = dataFromDrop;
+
+	//chart the new drops data
+	buildChart(dataFromDrop);
 }
 
+// Loads data and sets gui visuals for the selected tab
 function newDataSelected(dropId){
     //Toggle active tabs
     $("#Drop-"+m_activeDropId).removeClass("is-active");
@@ -161,7 +174,6 @@ function newDataSelected(dropId){
     m_activeDropId = dropId;
 
     $("#drop-details-container").show()
-
 
     console.log(m_DropDataList[dropId].name);
     selectedData = m_DropDataList[dropId].chartData;
@@ -206,6 +218,17 @@ function showLatestTable(){
   $("#show-latest-btn").addClass("is-loading");
 
   //load file
+  let dataToGraph = getLastRun();
+
+	buildChart(dataToGraph);
+
+  //remove loading sign
+  $("#show-latest-btn").removeClass("is-loading");
+}
+
+//Returns the parsed file to be charted
+function getLastRun(){
+	//load file
   var result = null;
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.open("GET", 'rawdata.csv', false);
@@ -215,13 +238,8 @@ function showLatestTable(){
   }
 
   //Graph the results
-  let dataToGraph = parseData(result);
-  buildChart(dataToGraph);
-
-  //remove loading sign
-  $("#show-latest-btn").removeClass("is-loading");
+  return parseData(result);
 }
-
 // dataStringArray: The string containing the data.
 // expected format "#,#,#\n#,#,#\n#,#,#...."
 // Returns the list of parsed data as an array of floats
@@ -254,7 +272,7 @@ function parseData(dataResultString){
 // Builds a line chart for the supplied y data array
 // ResultData: The y values of the line chart
 function buildChart(resultData) {
-    let chart = Highcharts.chart('container', {
+    let chart = Highcharts.chart('charting-container', {
             chart: {
                 type: 'line',
                 zoomType: 'x'
