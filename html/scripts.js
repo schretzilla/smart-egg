@@ -2,16 +2,16 @@
 //TODO: Put into on load complete method
 // Hide the stop button on load
 $("#stop").hide();
-$("#team-details-container").hide();
+$("#drop-details-container").hide();
 $("#loading-btn").hide();
 
 //TODO: only disable if no runs exist
-$("#downloadBtn").prop("disabled", true);
+$("#download-btn").prop("disabled", true);
 
 //List all drops history
-let m_teamDataList = [];
+let m_DropDataList = [];
 let m_currentChart; //Current chart in view
-let m_activeTab; //Index of the active tab
+let m_activeDropId; //Index of the active tab
 
 //TODO: update drop list on load
 //updateDropList();
@@ -29,26 +29,67 @@ function startRecord() {
 
 }
 
+//Delete the drop on confirmed delete
+function deleteDrop(){
+	// TODO: confirm delte works
+	HTTPRequest("functions/deleteRecord("+m_activeDropId+")", function(response) {});
+	closeModal();
+}
+
+// Show confirm delete dialog 
+function openConfirmDeleteDialog(){
+	buildModal();
+	$(".modal").addClass("is-active");
+
+}
+
+// Close open modal
+function closeModal() {
+		$(".modal").removeClass("is-active");
+		$("#modal-area").val("");
+}
+
 
 function updateDropList() { 
     //Get all Drops from API
     // for each drop, add drop to drop list
     
-    addTeam("team1");
+    addDrop("Drop1");
     
 }
 
-function addTeam() {
+function addDrop() {
     //Test data
     //TODO: Pull from API
     curDataList = [10, 15, 22, 33, 5, 6, 33, 2, 67];
     
-    let teamName = $("#team-name").val();
-    $("#team-name").val("");
-    let teamId = m_teamDataList.length;
-    let eggDrop = {name: teamName, chartData: curDataList };
-    m_teamDataList.push(eggDrop);
-    $("#drop-history").append('<li id=team-'+teamId+'> <a onClick="newDataSelected('+teamId+')">'+teamName+'</a></li>');
+    let DropName = $("#drop-name").val();
+    $("#drop-name").val("");
+    let DropId = m_DropDataList.length;
+    let eggDrop = {name: DropName, chartData: curDataList };
+    m_DropDataList.push(eggDrop);
+    $("#drop-history").append('<li id=Drop-'+DropId+'> <a onClick="newDataSelected('+DropId+')">'+DropName+'</a></li>');
+}
+
+function buildModal() {
+	let dropName = m_DropDataList[m_activeDropId].name;
+	$("#modal-area").append('<div id="my-modal" class="modal">\
+		<div class="modal-background"></div>\
+			<div class="modal-card">\
+				<header class="modal-card-head">\
+					<p class="modal-card-title">Confirm Delete</p>\
+					<button class="delete" aria-label="close" onClick="closeModal()"></button>\
+				</header>\
+				<section class="modal-card-body">\
+					<!-- Content ... -->\
+					Are you sure you\'d like to delete the drop "' + dropName + '"? There is no undoing this operation. \
+				</section>\
+				<footer class="modal-card-foot">\
+					<button class="button is-danger" onClick="deleteDrop()">Delete Drop</button>\
+					<button id="close-modal" class="button" onClick="closeModal()">Cancel</button>\
+				</footer>\
+			</div>\
+		</div>');
 }
 
 function stopRecord() {
@@ -62,20 +103,20 @@ function stopRecord() {
   HTTPRequest("functions/stopRecord()", function(response) {});
 
   // Data is now available to download
-  $("#downloadBtn").prop("disabled", false);
+  $("#download-btn").prop("disabled", false);
 }
 
-function newDataSelected(teamId){
+function newDataSelected(dropId){
     //Toggle active tabs
-    $("#team-"+m_activeTab).removeClass("is-active");
-    $("#team-"+teamId).addClass("is-active");
-    m_activeTab = teamId;
+    $("#Drop-"+m_activeDropId).removeClass("is-active");
+    $("#Drop-"+dropId).addClass("is-active");
+    m_activeDropId = dropId;
 
-    $("#team-details-container").show()
+    $("#drop-details-container").show()
 
 
-    console.log(m_teamDataList[teamId].name);
-    selectedData = m_teamDataList[teamId].chartData;
+    console.log(m_DropDataList[dropId].name);
+    selectedData = m_DropDataList[dropId].chartData;
     currentChart = buildChart(selectedData)
     currentChart.series[0].setData(selectedData, true);
 }
@@ -176,7 +217,7 @@ function buildChart(resultData) {
             },
         
             subtitle: {
-                text: 'Team: [Team Name]'
+                // text: 'Team: [Team Name]'
             },
             scrollbar: {
                 enabled: true

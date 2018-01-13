@@ -22,10 +22,20 @@
       font-size: 18px;
     }
 
+    #delete-button {
+     /* line-height: 12px; */
+     /* width: 18px; */
+     /* font-size: 8pt; */
+     /* font-family: tahoma; */
+     margin-top: 1px;
+     margin-right: 2px;
+     float:right;
+     top:0;
+     right:0;
+    }
 
 
 </style>
-
   <body>
     <section class="hero is-primary">
         <div class="hero-body">
@@ -45,11 +55,11 @@
               <p> 
                 <div class="field has-addons">
                   <div class="control">
-                    <input id="team-name" class="input" type="text" placeholder="Team Name">
+                    <input id="drop-name" class="input" type="text" placeholder="Drop Name">
                   </div>
                   <div class="control">
-                    <button class="button is-info" onclick="addTeam()">
-                      Create a Team!
+                    <button class="button is-info" onclick="addDrop()">
+                      Create a Drop!
                     </button>
                   </div>
                 </div>
@@ -62,14 +72,15 @@
           <nav class="tabs is-boxed is-fullwidth">
             <div class="container">
               <ul id="drop-history">
-                <!-- Team name List elements here -->
+                <!-- drop name List elements here -->
               </ul>
             </div>
           </nav>
         </div>
       </section>
 
-        <div id="team-details-container" class="custom-container">
+        <div id="drop-details-container" class="custom-container">
+          <button id="delete-button" class="delete is-medium" onclick="openConfirmDeleteDialog()">Delete Drop</button>
 
           <div class="columns">
             <div class="column is-12">
@@ -77,7 +88,7 @@
                 <p class="level-item has-text-centered">
                     <button id="record" type="button" class="button is-success" onclick="startRecord()">Start Recording</button>
                     <button id="stop" type="button" class="button is-danger" onclick="stopRecord()">Stop Recording</button>
-                    <button id="downloadBtn" type="submit" class="button is-info" onclick="window.open('rawdata.csv')">Download Run</button> 
+                    <button id="download-btn" type="submit" class="button is-info" onclick="window.open('rawdata.csv')">Download Run</button> 
                     <button id="loading-btn" type="submit" class="button is-info is-loading">Loading...</button> 
                 </p>
               </nav>
@@ -131,8 +142,10 @@
       </div> <!-- End Table Row -->
     </div> <!-- End custom container -->
 
-
-
+<!-- Delete Confirmation Modal -->
+<div id="modal-area">
+  
+</div>
 
 
 </body>
