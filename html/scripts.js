@@ -1,6 +1,6 @@
 //List all drops history
 let m_DropDataList = [];
-let m_currentChart; //Current chart in view
+// let m_currentChart; //Current chart in view
 let m_activeDropId; //Index of the active tab
 
 $(document).ready(function() {
@@ -62,6 +62,7 @@ function updateDropList() {
 	//TODO: Get drop list
 	let testDropList = [1,2,3,4,5];
 
+	//For each drop, get It's name and 
 	for(let i=0; i<testDropList.length; i++){
 		//Get each name of each drop
 		let name = getDropName(testDropList[i]);
@@ -105,7 +106,7 @@ function addTab(dropId, dropName){
 	$("#drop-history").append('<li id=Drop-'+dropId+'> <a onClick="newDataSelected('+dropId+')">'+dropName+'</a></li>');
 }
 
-// Add a new drop
+// Add a new drop to the tabs list
 function addNewDrop() {
     //Test data
     //TODO: Pull from API
@@ -164,8 +165,7 @@ function newDataSelected(dropId){
 
     console.log(m_DropDataList[dropId].name);
     selectedData = m_DropDataList[dropId].chartData;
-    currentChart = buildChart(selectedData)
-    currentChart.series[0].setData(selectedData, true);
+    let currentChart = buildChart(selectedData)
 }
 
 function setData(elementID, value) {
