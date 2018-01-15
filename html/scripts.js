@@ -86,6 +86,7 @@ function getDropName(id){
 	//TODO: Get drop name
 	//HTTPRequest("functions/dropName("+id+")", function(response) {});
 
+	//Get Random drop name while waiting for api
 	var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -234,7 +235,11 @@ function getLastRun(){
   xmlhttp.open("GET", 'rawdata.csv', false);
   xmlhttp.send();
   if (xmlhttp.status==200) {
-    result = xmlhttp.responseText;
+		result = xmlhttp.responseText;
+		
+		//Loading is complete. Hide loading button
+		$("#loading-btn").hide();
+
   }
 
   //Graph the results
