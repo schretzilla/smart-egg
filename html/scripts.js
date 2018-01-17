@@ -1,7 +1,7 @@
 //List all drops history
 let m_DropDataList = [];
 // let m_currentChart; //Current chart in view
-let m_activeDropId; //Index of the active tab
+let m_activeDropIndex; //Index of the active tab
 
 $(document).ready(function() {
 	//setup
@@ -27,14 +27,16 @@ function startRecord() {
   $("#record").hide();
   $("#stop").show();
 
-  HTTPRequest("functions/startRecord()", function(response) {});
-
-}
+  let curDropName = m_DropDataList[m_activeDropIndex];
+  // HTTPRequest("functions/startRecord()", function(response) {});
+  HTTPRequest("functions/recordStart/"+curDropName, function(response) {});
+  }
 
 //Delete the drop on confirmed delete
 function deleteDrop(){
-	// TODO: confirm delte works
-	HTTPRequest("functions/deleteRecord("+m_activeDropId+")", function(response) {});
+  // TODO: confirm delte works
+  let dropName = m_DropDataList[m_activeDropIndex];
+	HTTPRequest("functions/deleteRecord/"+dropName, function(response) {});
 	closeModal();
 }
 
@@ -60,16 +62,33 @@ function updateDropList() {
 	// for each drop, add drop to drop list
 	
 	//TODO: Get drop list
-	let testDropList = [1,2,3,4,5];
-
+  let testDropList = [1,2,3,4,5];
+  
 	//For each drop, get It's name and 
 	for(let i=0; i<testDropList.length; i++){
-		//Get each name of each drop
+    //Get each name of each drop
 		let name = getDropName(testDropList[i]);
 		let data = getRandomDropData();
 		addDrop(name, data);
 	}	
     
+}
+
+
+function getDropNames() {
+  HTTPRequest("functions/recordList", function(response) {
+    let nameList = response.split('\n');
+    for(let i=0; i<nameList.length; i++){
+      let curName = nameList[i];
+
+      HTTPRequest("functions/recordGetRaw/"+curName, function(dataList) {
+        //Todo: split data into array
+        addDrop(name, dataList);
+      });
+    }
+
+  });
+
 }
 
 function getRandomDropData(){
@@ -103,6 +122,7 @@ function addDrop(dropName, data) {
   this.addTab(eggDrop.id, dropName);
 }
 
+// Returns a bool if the newName parameter is unique in the m_DropDataList of names
 function nameIsUnique(newName){
   for(let i=0; i<m_DropDataList.length; i++){
     if(m_DropDataList[i].name == newName){
@@ -119,8 +139,6 @@ function addTab(dropId, dropName){
 
 // Add a uniquely named new drop to the tabs list
 function addNewDrop() {
-  //TODO: Pull from API
-  curDataList = [];
   let dropName = $("#drop-name").val();
 
   // check that the name is unique
@@ -128,6 +146,7 @@ function addNewDrop() {
   if(nameIsUnique){
     $("#drop-name").val("");
     let dropId = m_DropDataList.length;
+    curDataList = []; //empty data list to start  
     this.addDrop(dropName, curDataList);
   } else {
     //Todo: add text helper
@@ -137,7 +156,7 @@ function addNewDrop() {
 
 // Builds modal for delete confirmation
 function buildModal() {
-	let dropName = m_DropDataList[m_activeDropId].name;
+	let dropName = m_DropDataList[m_activeDropIndex].name;
 	$("#modal-area").append('<div id="my-modal" class="modal">\
 		<div class="modal-background"></div>\
 			<div class="modal-card">\
@@ -177,7 +196,7 @@ function stopRecord() {
 	let dataFromDrop = getLastRun();
 
 	// persist the data dropped to the current egg drop object
-	m_DropDataList[m_activeDropId].chartData = dataFromDrop;
+	m_DropDataList[m_activeDropIndex].chartData = dataFromDrop;
 
 	//chart the new drops data
 	buildChart(dataFromDrop);
@@ -186,9 +205,9 @@ function stopRecord() {
 // Loads data and sets gui visuals for the selected tab
 function newDataSelected(dropId){
     //Toggle active tabs
-    $("#Drop-"+m_activeDropId).removeClass("is-active");
+    $("#Drop-"+m_activeDropIndex).removeClass("is-active");
     $("#Drop-"+dropId).addClass("is-active");
-    m_activeDropId = dropId;
+    m_activeDropIndex = dropId;
 
     $("#drop-details-container").show()
 
@@ -388,6 +407,31 @@ function HTTPRequest(url, successFunction) {
   request.send(null);
 }
 
+
+//TODO: Test AJAX requests
+// $.ajax({
+//   data: someData,
+//   dataType: 'json',
+//   url: '/path/to/script'
+// }).done(function(data) {
+//   // If successful
+//  console.log(data);
+// }).fail(function(jqXHR, textStatus, errorThrown) {
+//   // If fail
+//   console.log(textStatus + ': ' + errorThrown);
+// });
+
+// TODO: Chain ajax
+// var a1 = $.ajax({...}),
+//     a2 = $.ajax({...});
+
+// $.when(a1, a2).done(function(r1, r2) {
+//     // Each returned resolve has the following structure:
+//     // [data, textStatus, jqXHR]
+//     // e.g. To access returned data, access the array at index 0
+//     console.log(r1[0]);
+//     console.log(r2[0]);
+// });
 
 
 // /functions/recordStart/<recordingName>           // Starts a recording with the name <recordingName>, returns string -1 if no name provided, -2 if the code timed out, -3 if name already exists, -4 if no space
