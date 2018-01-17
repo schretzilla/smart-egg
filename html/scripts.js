@@ -27,7 +27,7 @@ function startRecord() {
   $("#record").hide();
   $("#stop").show();
 
-  let curDropName = m_DropDataList[m_activeDropIndex];
+  let curDropName = m_DropDataList[m_activeDropIndex].name;
   // HTTPRequest("functions/startRecord()", function(response) {});
   HTTPRequest("functions/recordStart/"+curDropName, function(response) {});
   }
@@ -35,7 +35,7 @@ function startRecord() {
 //Delete the drop on confirmed delete
 function deleteDrop(){
   // TODO: confirm delte works
-  let dropName = m_DropDataList[m_activeDropIndex];
+  let dropName = m_DropDataList[m_activeDropIndex].name;
 	HTTPRequest("functions/deleteRecord/"+dropName, function(response) {});
 	closeModal();
 }
@@ -62,19 +62,19 @@ function updateDropList() {
 	// for each drop, add drop to drop list
 	
 	//TODO: Get drop list
-  let testDropList = [1,2,3,4,5];
+  // let testDropList = [1,2,3,4,5];
   
-	//For each drop, get It's name and 
-	for(let i=0; i<testDropList.length; i++){
-    //Get each name of each drop
-		let name = getDropName(testDropList[i]);
-		let data = getRandomDropData();
-		addDrop(name, data);
-	}	
+	// //For each drop, get It's name and 
+	// for(let i=0; i<testDropList.length; i++){
+  //   //Get each name of each drop
+	// 	let name = getDropName(testDropList[i]);
+	// 	let data = getRandomDropData();
+	// 	addDrop(name, data);
+	// }	
     
 }
 
-
+// Get all drop names and their individual current data. 
 function getDropNames() {
   HTTPRequest("functions/recordList", function(response) {
     let nameList = response.split('\n');
@@ -82,7 +82,8 @@ function getDropNames() {
       let curName = nameList[i];
 
       HTTPRequest("functions/recordGetRaw/"+curName, function(dataList) {
-        //Todo: split data into array
+        //split data into array
+        let magnitudeData = parseData(dataList);
         addDrop(name, dataList);
       });
     }
@@ -90,6 +91,32 @@ function getDropNames() {
   });
 
 }
+
+// function actuallAjaxLoadOfAllData(){
+//   $.ajax({
+//     data: someData,
+//     dataType: 'json',
+//     url: 'functions/recordList'
+//   }).done(function(data) {
+//     // If successful
+//   console.log(data);
+//   }).fail(function(jqXHR, textStatus, errorThrown) {
+//     // If fail
+//     console.log(textStatus + ': ' + errorThrown);
+//   });
+
+//   TODO: Chain ajax
+//   var a1 = $.ajax({...}),
+//       a2 = $.ajax({...});
+
+//   $.when(a1, a2).done(function(r1, r2) {
+//       // Each returned resolve has the following structure:
+//       // [data, textStatus, jqXHR]
+//       // e.g. To access returned data, access the array at index 0
+//       console.log(r1[0]);
+//       console.log(r2[0]);
+//   });
+// }
 
 function getRandomDropData(){
 	let dropData = [];
@@ -100,21 +127,19 @@ function getRandomDropData(){
 }
 
 // Get Drop name
-function getDropName(id){
+// TODO: Delete, just for testing
+// function getDropName(id){
+// 	//Get Random drop name while waiting for api
+// 	var text = "";
+//   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-	//TODO: Get drop name
-	//HTTPRequest("functions/dropName("+id+")", function(response) {});
+//   for (var i = 0; i < 5; i++)
+//     text += possible.charAt(Math.floor(Math.random() * possible.length));
 
-	//Get Random drop name while waiting for api
-	var text = "";
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+//   return text;
+// }
 
-  for (var i = 0; i < 5; i++)
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-  return text;
-}
-
+// Adds a drop to the drop list and the tabs
 function addDrop(dropName, data) {
 
   let eggDrop = {id: m_DropDataList.length, name: dropName, chartData: data };
@@ -132,7 +157,7 @@ function nameIsUnique(newName){
   return true;
 }
 
-// Add a drop to the lsit of tabs
+// Add a drop to the list of tabs
 function addTab(dropId, dropName){
 	$("#drop-history").append('<li id=Drop-'+dropId+'> <a onClick="newDataSelected('+dropId+')">'+dropName+'</a></li>');
 }
@@ -178,17 +203,11 @@ function buildModal() {
 
 function stopRecord() {
   //Toggle the stop and start buttons
-  // $("#record").show();
 	$("#stop").hide();
 
 	// Stop Recording
-	HTTPRequest("functions/stopRecord()", function(response) {});
+	HTTPRequest("functions/recordStop", function(response) {});
 
-
-  //TODO: show the loading button while the data is being retireved
-  $("#loading-btn").show();
-
-	// TODO: Delete this button put csv onto chart
   // Data is now available to download
 	$("#download-btn").prop("disabled", false);
 	
@@ -350,7 +369,7 @@ function buildChart(resultData) {
                 }
             },
             series: [{
-                name: 'Installation',
+                name: 'Raw Data',
                 data: resultData
             }],
         
