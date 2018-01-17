@@ -97,9 +97,19 @@ function getDropName(id){
 }
 
 function addDrop(dropName, data) {
-		let eggDrop = {id: m_DropDataList.length, name: dropName, chartData: data };
-		m_DropDataList.push(eggDrop);
-		this.addTab(eggDrop.id, dropName);
+
+  let eggDrop = {id: m_DropDataList.length, name: dropName, chartData: data };
+  m_DropDataList.push(eggDrop);
+  this.addTab(eggDrop.id, dropName);
+}
+
+function nameIsUnique(newName){
+  for(let i=0; i<m_DropDataList.length; i++){
+    if(m_DropDataList[i].name == newName){
+      return false;
+    }
+  }
+  return true;
 }
 
 // Add a drop to the lsit of tabs
@@ -107,16 +117,22 @@ function addTab(dropId, dropName){
 	$("#drop-history").append('<li id=Drop-'+dropId+'> <a onClick="newDataSelected('+dropId+')">'+dropName+'</a></li>');
 }
 
-// Add a new drop to the tabs list
+// Add a uniquely named new drop to the tabs list
 function addNewDrop() {
-    //Test data
-    //TODO: Pull from API
-    curDataList = [];
-    
-    let dropName = $("#drop-name").val();
+  //TODO: Pull from API
+  curDataList = [];
+  let dropName = $("#drop-name").val();
+
+  // check that the name is unique
+  let nameIsUnique = this.nameIsUnique(dropName);
+  if(nameIsUnique){
     $("#drop-name").val("");
     let dropId = m_DropDataList.length;
     this.addDrop(dropName, curDataList);
+  } else {
+    //Todo: add text helper
+    alert("Name must be unique");
+  }
 }
 
 // Builds modal for delete confirmation
@@ -373,4 +389,17 @@ function HTTPRequest(url, successFunction) {
 }
 
 
-//window.onload =
+
+// /functions/recordStart/<recordingName>           // Starts a recording with the name <recordingName>, returns string -1 if no name provided, -2 if the code timed out, -3 if name already exists, -4 if no space
+// /functions/recordStop                                                  // Stops a current recording and returns 0 if successful, -1 if no recording in progress
+// /functions/recordStatus                                                               // Returns 0 if idle, 1 if recording
+// /functions/recordList                                                     // Returns list of recording separated by new line character ‘\n’
+// /functions/recordGetRaw/<recordingName>    // Chunked get response containing a csv string (~620KB) with raw datavalues (0 to 4096), content contains “t,x,y,z”
+// /functions/recordGetForce/<recordingName>  // Chunked get response containing a csv string (~620KB) with gForce data (-200 to 200 G), content contains “t,x,y,z”
+// /functions/recordDelete/<recordingName>       // Deletes a recording with the name <recordingName>, returns string 0 if successful, -1 if does not exist
+// /functions/recordDeleteAll                                         // Deletes all recordings
+// /functions/recordSpaceLeft                                        // Returns string with size in bytes left
+// /functions/recordGetMaxTime                                 // Returns string with max recording time (Default 60 Seconds)
+// /functions/recordSetMaxTime/<timeInSeconds>            // Set the max recording time
+// /functions/calibrate                                                        // Calibrates the accelerometer and returns a string with the offsets
+
