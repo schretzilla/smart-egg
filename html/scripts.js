@@ -29,14 +29,102 @@ function startRecord() {
 
   let curDropName = m_DropDataList[m_activeDropIndex].name;
   // HTTPRequest("functions/startRecord()", function(response) {});
-  HTTPRequest("functions/recordStart/"+curDropName, function(response) {});
-  }
+  let requestStr = "/functions/recordStart/" + curDropName;
+  //HTTPRequest(requestStr, function(response) {});
+
+  $.ajax({
+      dataType: 'text',
+      url: requestStr
+    }).done(function(response) {
+      // If successful
+        console.log(response);
+        if(response != 0 ){
+          //bad record force start and alert
+          alert("Bad Record, forcing stop");
+          HTTPRequest("/functions/recordStop", function(response) {
+            console.log("recordStop Status: " + response);
+          });
+        }
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+      // If fail
+      console.log(textStatus + ': ' + errorThrown);
+    })
+}
+
+function stopRecord() {
+  //Disable and show loading of stop button
+  $("#stop").prop("disabled", true).addClass("is-loading");;
+
+  // Data is now available to download
+  $("#download-btn").prop("disabled", false);
+
+  // Stop the recording then get the drop data
+  ajaxStopRecord().then(getAjaxDropData);
+  
+}
+
+function ajaxStopRecord(){
+  return $.ajax({
+    dataType: 'text',
+    url: 'functions/recordStop'
+  }).done(function(data) {
+    // If successful
+    console.log("stopping status: " + data);
+  }).fail(function(jqXHR, textStatus, errorThrown) {
+    // If fail
+    console.log(textStatus + ': ' + errorThrown);
+  });
+}
+
+// Ajax request to get and plot the data
+function getAjaxDropData() {
+  let curDrop = m_DropDataList[m_activeDropIndex]
+  let getDataUrl = "/functions/recordGetAxes/" + curDrop.name;
+
+  return $.ajax({
+    dataType: 'text',
+    url: getDataUrl
+  }).done(function(data) {
+    // If successful
+    console.log("data retrieved: " + data);
+
+    //Plot data
+    buildChart(curDrop.chartData);
+
+    $("#stop").prop("disabled", false).removeClass("is-loading").hide();
+
+  }).fail(function(jqXHR, textStatus, errorThrown) {
+    // If fail
+    console.log(textStatus + ': ' + errorThrown);
+  });
+}
+
+// get drop data and plot it
+// function getDropData(){
+//   let curDrop = m_DropDataList[m_activeDropIndex]
+//   let url = "/functions/recordGetAxes/" + curDrop.name;
+  
+//   //Get data and parse it
+//   HTTPRequest(url, function(response) {
+//     console.log("Retrieved drop data: " + response);
+//     let magnitudeData = parseData(response);
+//     curDrop.chartData = magnitudeData;
+//     buildChart(curDrop.chartData);
+//   });
+
+// }
 
 //Delete the drop on confirmed delete
 function deleteDrop(){
   // TODO: confirm delte works
   let dropName = m_DropDataList[m_activeDropIndex].name;
-	HTTPRequest("functions/deleteRecord/"+dropName, function(response) {});
+	HTTPRequest("/functions/recordDelete/"+dropName, function(response) {});
+
+  //TDODO currently deletes all... dont do that
+   // HTTPRequest("/functions/recordDeleteAll", function(response) {});
+
+   // Remove tab of item 
+   $("#Drop-"+dropName).remove();
 	closeModal();
 }
 
@@ -59,20 +147,20 @@ function createDrop(name, valuesArray){
 
 function updateDropList() { 
 	//Get all Drops from API
-	// for each drop, add drop to drop list
-	
-	//TODO: Get drop list
-  // let testDropList = [1,2,3,4,5];
-  
-	// //For each drop, get It's name and 
-	// for(let i=0; i<testDropList.length; i++){
-  //   //Get each name of each drop
-	// 	let name = getDropName(testDropList[i]);
-	// 	let data = getRandomDropData();
-	// 	addDrop(name, data);
-	// }	
+  HTTPRequest("/functions/recordList", function(response) {
+    //Check that names exist to avoid adding empty tabs
+    console.log("recordList:\n" + response);
+    if(response != ""){
+      let dropNames = response.split('\n');
+      for(let i=0; i<dropNames.length; i++){
+        // Add a drop and a tab with no data because it hasn't been pulled yet
+        addDrop(dropNames[i], []);
+      }
+    }
+  });
     
 }
+
 
 // Get all drop names and their individual current data. 
 function getDropNames() {
@@ -92,31 +180,6 @@ function getDropNames() {
 
 }
 
-// function actuallAjaxLoadOfAllData(){
-//   $.ajax({
-//     data: someData,
-//     dataType: 'json',
-//     url: 'functions/recordList'
-//   }).done(function(data) {
-//     // If successful
-//   console.log(data);
-//   }).fail(function(jqXHR, textStatus, errorThrown) {
-//     // If fail
-//     console.log(textStatus + ': ' + errorThrown);
-//   });
-
-//   TODO: Chain ajax
-//   var a1 = $.ajax({...}),
-//       a2 = $.ajax({...});
-
-//   $.when(a1, a2).done(function(r1, r2) {
-//       // Each returned resolve has the following structure:
-//       // [data, textStatus, jqXHR]
-//       // e.g. To access returned data, access the array at index 0
-//       console.log(r1[0]);
-//       console.log(r2[0]);
-//   });
-// }
 
 function getRandomDropData(){
 	let dropData = [];
@@ -125,19 +188,6 @@ function getRandomDropData(){
 	}
 	return dropData;
 }
-
-// Get Drop name
-// TODO: Delete, just for testing
-// function getDropName(id){
-// 	//Get Random drop name while waiting for api
-// 	var text = "";
-//   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-//   for (var i = 0; i < 5; i++)
-//     text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-//   return text;
-// }
 
 // Adds a drop to the drop list and the tabs
 function addDrop(dropName, data) {
@@ -159,7 +209,7 @@ function nameIsUnique(newName){
 
 // Add a drop to the list of tabs
 function addTab(dropId, dropName){
-	$("#drop-history").append('<li id=Drop-'+dropId+'> <a onClick="newDataSelected('+dropId+')">'+dropName+'</a></li>');
+	$("#drop-history").append('<li id=Drop-'+dropName+'> <a onClick="newDataSelected('+dropId+')">'+dropName+'</a></li>');
 }
 
 // Add a uniquely named new drop to the tabs list
@@ -201,30 +251,10 @@ function buildModal() {
 		</div>');
 }
 
-function stopRecord() {
-  //Toggle the stop and start buttons
-	$("#stop").hide();
-
-	// Stop Recording
-	HTTPRequest("functions/recordStop", function(response) {});
-
-  // Data is now available to download
-	$("#download-btn").prop("disabled", false);
-	
-	//Load the newest data
-	let dataFromDrop = getLastRun();
-
-	// persist the data dropped to the current egg drop object
-	m_DropDataList[m_activeDropIndex].chartData = dataFromDrop;
-
-	//chart the new drops data
-	buildChart(dataFromDrop);
-}
-
 // Loads data and sets gui visuals for the selected tab
 function newDataSelected(dropId){
     //Toggle active tabs
-    $("#Drop-"+m_activeDropIndex).removeClass("is-active");
+    $("#Drop-"+m_DropDataList[dropId].name).removeClass("is-active");
     $("#Drop-"+dropId).addClass("is-active");
     m_activeDropIndex = dropId;
 
@@ -232,6 +262,15 @@ function newDataSelected(dropId){
 
     console.log(m_DropDataList[dropId].name);
     selectedData = m_DropDataList[dropId].chartData;
+
+    //Hide start button if the drop has already been recorded
+    if(selectedData.length == 0 ){
+      $("#record").show();
+    } else {
+      // data has been recorded already
+      $("#record").hide();
+    }
+
     let currentChart = buildChart(selectedData)
 }
 
@@ -281,6 +320,10 @@ function showLatestTable(){
   $("#show-latest-btn").removeClass("is-loading");
 }
 
+function getFakeData(){
+  return "t,x,y,z\n0,3,1,4\n1,4,5,6\n2,3,5,7\n3,4,50,33\n4,32,13,55"
+}
+
 //Returns the parsed file to be charted
 function getLastRun(){
 	//load file
@@ -317,9 +360,10 @@ function parseData(dataResultString){
 
     // TODO: break into function
     // Find the magnitude
-    let xPoint = parseFloat(curDataPoints[0]);
-    let yPoint = parseFloat(curDataPoints[1]);
-    let zPoint = parseFloat(curDataPoints[2]);
+    let tPoint = parseFloat(curDataPoints[0]);
+    let xPoint = parseFloat(curDataPoints[1]);
+    let yPoint = parseFloat(curDataPoints[2]);
+    let zPoint = parseFloat(curDataPoints[3]);
     let magnitude = Math.sqrt( (xPoint*xPoint) + (yPoint*yPoint) + (zPoint*zPoint) );
 
     dataListToPlot.push(magnitude);
@@ -347,7 +391,7 @@ function buildChart(resultData) {
                 enabled: true
             },
             xAxis: {
-                max: 500    //Set the max points in the view
+                // max: 500    //Set the max points in the view
                             //TODO: Set scroll bar to far right
             },
             yAxis: {
@@ -376,7 +420,7 @@ function buildChart(resultData) {
             responsive: {
                 rules: [{
                     condition: {
-                        maxWidth: 500
+                        maxWidth: 10000
                     },
                     chartOptions: {
                         legend: {
