@@ -3,6 +3,11 @@ let m_DropDataList = [];
 // let m_currentChart; //Current chart in view
 let m_activeDropIndex; //Index of the active tab
 
+// For production with egg
+let urlEndPoint = "/functions";
+// For Development without egg
+// let urlEndPoint = "http://localhost:3000";
+
 $(document).ready(function() {
 	//setup
 	//TODO: Put into on load complete method
@@ -11,16 +16,12 @@ $(document).ready(function() {
 	$("#loading-btn").hide();
 
 	//TODO: only disable if no runs exist
-	$("#download-btn").prop("disabled", true);
+	$("#download-btn").hide();
 
 	//TODO: update drop list on load
 	updateDropList();
 
 });
-
-function updateEvents() {
-  setInterval(updateTable(), 1000);
-}
 
 function startRecord() {
   // Toggle start and stop button
@@ -29,44 +30,48 @@ function startRecord() {
 
   let curDropName = m_DropDataList[m_activeDropIndex].name;
   // HTTPRequest("functions/startRecord()", function(response) {});
-  let requestStr = "/functions/recordStart/" + curDropName;
+  let requestStr = urlEndPoint+"/recordStart/" + curDropName;
   //HTTPRequest(requestStr, function(response) {});
 
-  $.ajax({
-      dataType: 'text',
-      url: requestStr
-    }).done(function(response) {
-      // If successful
-        console.log(response);
-        if(response != 0 ){
-          //bad record force start and alert
-          alert("Bad Record, forcing stop");
-          HTTPRequest("/functions/recordStop", function(response) {
-            console.log("recordStop Status: " + response);
-          });
-        }
-    }).fail(function(jqXHR, textStatus, errorThrown) {
-      // If fail
-      console.log(textStatus + ': ' + errorThrown);
-    })
+  //Call ajax start record
+  ajaxStartRecord();
+  
+}
+
+function ajaxStartRecord(){
+  let requestStr = urlEndPoint+"/recordStart/" + curDropName;
+  return $.ajax({
+    dataType: 'text',
+    url: requestStr
+  }).done(function(response) {
+    // If successful
+      console.log(response);
+      if(response != 0 ){
+        //bad record force start and alert
+        alert("Bad Record, forcing stop");
+        HTTPRequest(urlEndPoint+"/recordStop", function(response) {
+          console.log("recordStop Status: " + response);
+        });
+      }
+  }).fail(function(jqXHR, textStatus, errorThrown) {
+    // If fail
+    console.log(textStatus + ': ' + errorThrown);
+  })
 }
 
 function stopRecord() {
   //Disable and show loading of stop button
   $("#stop").prop("disabled", true).addClass("is-loading");;
 
-  // Data is now available to download
-  $("#download-btn").prop("disabled", false);
-
   // Stop the recording then get the drop data
-  ajaxStopRecord().then(getAjaxDropData);
+  ajaxStopRecord().then(ajaxGetDropData);
   
 }
 
 function ajaxStopRecord(){
   return $.ajax({
     dataType: 'text',
-    url: 'functions/recordStop'
+    url: urlEndPoint+'/recordStop'
   }).done(function(data) {
     // If successful
     console.log("stopping status: " + data);
@@ -77,9 +82,9 @@ function ajaxStopRecord(){
 }
 
 // Ajax request to get and plot the data
-function getAjaxDropData() {
+function ajaxGetDropData() {
   let curDrop = m_DropDataList[m_activeDropIndex]
-  let getDataUrl = "/functions/recordGetAxes/" + curDrop.name;
+  let getDataUrl = urlEndPoint+"/recordGetAxes/" + curDrop.name;
 
   return $.ajax({
     dataType: 'text',
@@ -89,43 +94,68 @@ function getAjaxDropData() {
     console.log("data retrieved: " + data);
 
     //Plot data
+    let magnitudeData = parseData(data);
+    curDrop.chartData = magnitudeData;
     buildChart(curDrop.chartData);
 
     $("#stop").prop("disabled", false).removeClass("is-loading").hide();
-
+    
+    // Data is now available to download
+    $("#download-btn").show();
   }).fail(function(jqXHR, textStatus, errorThrown) {
     // If fail
     console.log(textStatus + ': ' + errorThrown);
   });
 }
 
-// get drop data and plot it
-// function getDropData(){
-//   let curDrop = m_DropDataList[m_activeDropIndex]
-//   let url = "/functions/recordGetAxes/" + curDrop.name;
-  
-//   //Get data and parse it
-//   HTTPRequest(url, function(response) {
-//     console.log("Retrieved drop data: " + response);
-//     let magnitudeData = parseData(response);
-//     curDrop.chartData = magnitudeData;
-//     buildChart(curDrop.chartData);
-//   });
+function downloadCsv(){
+  let curDrop = m_DropDataList[m_activeDropIndex]
+  // split the comma sep data to insert new lines instead
+  const rows = curDrop.chartData.split(',');
+  let csvContent = "data:text/csv;charset=utf-8,";
+  rows.forEach(function(rowArray){
+    csvContent += row + "\r\n"; // add carriage return
+  }); 
 
-// }
+  // Create a hidden ele and click it to download the data
+  var encodedUri = encodeURI(csvContent);
+  var link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "my_data.csv");
+  document.body.appendChild(link); // Required for FF
+
+  link.click(); // This will download the data file named "my_data.csv".
+
+}
 
 //Delete the drop on confirmed delete
 function deleteDrop(){
   // TODO: confirm delte works
   let dropName = m_DropDataList[m_activeDropIndex].name;
-	HTTPRequest("/functions/recordDelete/"+dropName, function(response) {});
-
+	// HTTPRequest(urlEndPoint+"/recordDelete/"+dropName, function(response) {});
+  ajaxDeleteDrop();
   //TDODO currently deletes all... dont do that
    // HTTPRequest("/functions/recordDeleteAll", function(response) {});
 
    // Remove tab of item 
    $("#Drop-"+dropName).remove();
 	closeModal();
+}
+
+function ajaxDeleteDrop(){
+  let dropName = m_DropDataList[m_activeDropIndex].name;
+  let requestString = urlEndPoint+"/recordDelete/"+dropName;
+  return $.ajax({
+            dataType: 'text',
+            url: requestStr
+          }).done(function(response) {
+            // If successful
+              console.log("Delete Status: " + response);
+              
+          }).fail(function(jqXHR, textStatus, errorThrown) {
+            // If fail
+            console.log(textStatus + ': ' + errorThrown);
+          });
 }
 
 // Show confirm delete dialog 
@@ -145,9 +175,46 @@ function createDrop(name, valuesArray){
 	return {name: name, chartData: valuesArray};
 }
 
+//Pull all existing drop names from the egg and populate the tabs with them
 function updateDropList() { 
 	//Get all Drops from API
-  HTTPRequest("/functions/recordList", function(response) {
+  ajaxUpdateDropList();
+
+  //load all the data up front for each one
+  for(let i=0; i<m_DropDataList.length; i++){
+    let curDrop = m_DropDataList[i];
+    ajaxSimpleGetData(curDrop);
+  }
+}
+
+function ajaxSimpleGetData(drop) {
+  let getDataUrl = urlEndPoint+"/recordGetAxes/" + drop.name;
+
+  return $.ajax({
+    dataType: 'text',
+    url: getDataUrl
+  }).done(function(data) {
+    // If successful
+    console.log("data retrieved: " + data);
+
+    //Plot data
+    let magnitudeData = parseData(data);
+    drop.chartData = magnitudeData;
+
+  }).fail(function(jqXHR, textStatus, errorThrown) {
+    // If fail
+    console.log(textStatus + ': ' + errorThrown);
+  });
+}
+
+function ajaxUpdateDropList() {
+  let requestStr = urlEndPoint+"/recordList"
+  return  $.ajax({
+      dataType: 'text',
+      url: requestStr
+    }).done(function(response) {
+    response = devToPrdResponseConverter(response);
+
     //Check that names exist to avoid adding empty tabs
     console.log("recordList:\n" + response);
     if(response != ""){
@@ -157,36 +224,10 @@ function updateDropList() {
         addDrop(dropNames[i], []);
       }
     }
-  });
-    
-}
-
-
-// Get all drop names and their individual current data. 
-function getDropNames() {
-  HTTPRequest("functions/recordList", function(response) {
-    let nameList = response.split('\n');
-    for(let i=0; i<nameList.length; i++){
-      let curName = nameList[i];
-
-      HTTPRequest("functions/recordGetRaw/"+curName, function(dataList) {
-        //split data into array
-        let magnitudeData = parseData(dataList);
-        addDrop(name, dataList);
-      });
-    }
-
-  });
-
-}
-
-
-function getRandomDropData(){
-	let dropData = [];
-	for(let i=0; i<140; i++){
-		dropData.push(Math.random() * 100);
-	}
-	return dropData;
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+      // If fail
+      console.log(textStatus + ': ' + errorThrown);
+    });
 }
 
 // Adds a drop to the drop list and the tabs
@@ -265,83 +306,20 @@ function newDataSelected(dropId){
 
     //Hide start button if the drop has already been recorded
     if(selectedData.length == 0 ){
+      ajaxGetDropData
+
+      // No data has been cached for this drop
       $("#record").show();
+      $("#download-btn").hide();
     } else {
-      // data has been recorded already
+      // Data has been recorded for this drop
       $("#record").hide();
+      $("#download-btn").show();
     }
 
     let currentChart = buildChart(selectedData)
 }
 
-function setData(elementID, value) {
-  document.getElementById(elementID).innerHTML = value;
-}
-
-function updateTable() {
-  HTTPRequest("functions/getInstant()", function(response) {
-    var dataArray = getDataArray(response);
-
-    setData("rawX", dataArray[0]);
-    setData("rawY", dataArray[1]);
-    setData("rawZ", dataArray[2]);
-    setData("gX", dataArray[3]);
-    setData("gY", dataArray[4]);
-    setData("gZ", dataArray[5]);
-
-    console.log("Table Updated");
-  });
-}
-
-function getDataArray(dataString) {
-    dataString = dataString.trim();
-    var dataArray = new Array();
-    
-    while(dataString.indexOf(',') != -1) {
-      dataArray.push(dataString.substring(0, dataString.indexOf(',')));
-      dataString = dataString.substring(dataString.indexOf(',') + 1).trim();
-    }
-    dataArray.push(dataString);
-
-    return dataArray;
-}
-
-// Update the graph with the rawdata.csv file most recently collected from a data run
-function showLatestTable(){
-  // Show loading while parsing is happening
-  $("#show-latest-btn").addClass("is-loading");
-
-  //load file
-  let dataToGraph = getLastRun();
-
-	buildChart(dataToGraph);
-
-  //remove loading sign
-  $("#show-latest-btn").removeClass("is-loading");
-}
-
-function getFakeData(){
-  return "t,x,y,z\n0,3,1,4\n1,4,5,6\n2,3,5,7\n3,4,50,33\n4,32,13,55"
-}
-
-//Returns the parsed file to be charted
-function getLastRun(){
-	//load file
-  var result = null;
-  var xmlhttp = new XMLHttpRequest();
-  xmlhttp.open("GET", 'rawdata.csv', false);
-  xmlhttp.send();
-  if (xmlhttp.status==200) {
-		result = xmlhttp.responseText;
-		
-		//Loading is complete. Hide loading button
-		$("#loading-btn").hide();
-
-  }
-
-  //Graph the results
-  return parseData(result);
-}
 // dataStringArray: The string containing the data.
 // expected format "#,#,#\n#,#,#\n#,#,#...."
 // Returns the list of parsed data as an array of floats

@@ -97,8 +97,7 @@
                     <button id="record" type="button" class="button is-success" onclick="startRecord()">Start Recording</button>
                     <button id="stop" type="button" class="button is-danger" onclick="stopRecord()">Stop Recording</button>
                     <button id="loading-btn" type="submit" class="button is-info is-loading">Loading...</button> 
-                    <button id="get-data-btn" type="submit" class="button is-info" onclick="getDropData()">Plot Data</button> 
-                    <button id="download-btn" type="submit" class="button is-info" onclick="window.open('rawdata.csv')">Download CSV</button> 
+                    <button id="download-btn" type="submit" class="button is-info" onclick="downloadCsv()">Download CSV</button> 
                 </p>
               </nav>
  
@@ -111,7 +110,6 @@
               <nav class="level">
                 <p id="charting-container" class="level-item has-text-centered">
                   <!-- Chart's Column -->        
-                  <button id="show-latest-btn" type="button" class="button is-primary" onclick="showLatestTable()">Show Latest Chart</button>
                   <!-- Charting section -->
                   <div><div ></div></div>
                   
@@ -119,37 +117,6 @@
               </nav>
             </div>
           </div> <!-- End Chart's Row -->
-
-          <!-- Table Row -->          
-          <div class="columns">
-            <div class="column is-12">
-              <!-- Center column used for instant data -->
-              <button class="button is-link" onclick="updateTable()">Update Table</button> 
-              <table>
-                <tr>
-                  <th>Axis</th>
-                  <th>Raw</th>
-                  <th>gForce</th>
-                </tr>
-                <tr>
-                  <th>x</th>
-                  <th id="rawX">0.0</th>
-                  <th id="gX">0.0</th>
-                </tr>
-                <tr>
-                  <th>y</th>
-                  <th id="rawY">0.0</th>
-                  <th id="gY">0.0</th>
-                </tr>
-                <tr>
-                  <th>z</th>
-                  <th id="rawZ">0.0</th>
-                  <th id="gZ">0.0</th>
-                </tr>
-              </table>
-          </div> <!-- End col for table -->
-      </div> <!-- End Table Row -->
-    </div> <!-- End custom container -->
 
 <!-- Delete Confirmation Modal -->
 <div id="modal-area">
