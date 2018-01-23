@@ -1,3 +1,5 @@
+// Session storage is used to store name - data values
+
 //List all drops history
 let m_DropDataList = [];
 let m_activeDropIndex; //Index of the active tab
@@ -13,11 +15,9 @@ $(document).ready(function() {
 	$("#stop").hide();
 	$("#loading-btn").hide();
 
-	//TODO: only disable if no runs exist
   $("#download-btn").hide();
   $("#loading").hide();
   // $("#main-content").hide();
-	//TODO: update drop list on load
 	updateDropList();
 
 });
@@ -136,7 +136,6 @@ function downloadCsv(){
 
 //Delete the drop on confirmed delete
 function deleteDrop(){
-  // TODO: confirm delte works
   let dropName = m_DropDataList[m_activeDropIndex].name;
   ajaxDeleteDrop();
 
@@ -204,11 +203,9 @@ function LoadAllDropData(){
   }
 }
 
-// TODO: save it to local storage
 function ajaxLoadAllDropData(drop, indexNum) {
   let getDataUrl = urlEndPoint+"/recordGetAxes/" + drop.name;
 
-  //TODO: Do this better
   return $.ajax({
     dataType: 'text',
     url: getDataUrl
@@ -237,7 +234,7 @@ function ajaxLoadAllDropData(drop, indexNum) {
   });
 }
 
-//TODO: Add to local storage
+// Gets all drop names and creates tabs for each one.
 function ajaxUpdateDropList() {
   let requestStr = urlEndPoint+"/recordList"
   return  $.ajax({
@@ -295,8 +292,7 @@ function addNewDrop() {
     curDataList = []; //empty data list to start  
     this.addDrop(dropName, curDataList);
   } else {
-    //Todo: add text helper
-    alert("Name must be unique");
+    alert("The name " + dropName + " is already used. Please use a unique name.");
   }
 }
 
@@ -336,8 +332,6 @@ function newDataSelected(dropId){
 
     //Hide start button if the drop has already been recorded
     if(selectedData.length == 0 ){
-      // ajaxGetDropData
-
       // No data has been cached for this drop
       $("#record").show();
       $("#download-btn").hide();
