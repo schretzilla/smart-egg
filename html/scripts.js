@@ -99,6 +99,9 @@ function ajaxGetDropData() {
     curDrop.chartData = magnitudeData;
     buildChart(curDrop.chartData);
 
+    //store data locally
+    sessionStorage.setItem(curDrop.name, curDrop.chartData);
+
     $("#stop").prop("disabled", false).removeClass("is-loading").hide();
     
     // Data is now available to download
@@ -131,7 +134,6 @@ function downloadCsv(){
 
 }
 
-//TODO: Delete from local storage
 //Delete the drop on confirmed delete
 function deleteDrop(){
   // TODO: confirm delte works
@@ -151,7 +153,9 @@ function ajaxDeleteDrop(){
             url: requestStr
           }).done(function(response) {
             // If successful
-              console.log("Delete Status: " + response);
+            //remove from local storage
+            sessionStorage.removeItem(dropName);
+            console.log("Delete Status: " + response);
               
           }).fail(function(jqXHR, textStatus, errorThrown) {
             // If fail
@@ -179,7 +183,25 @@ function createDrop(name, valuesArray){
 //Pull all existing drop names from the egg and populate the tabs with them
 function updateDropList() { 
   //Get all Drops from API
-  ajaxUpdateDropList().then(ajaxLoadAllDropData);  
+  ajaxUpdateDropList().then(LoadAllDropData);  
+}
+
+// Checks the drops in order to see if the drop's data exists locally. If it does then
+// then skip pulling its data. If it does not then pull all following drop's data.
+function LoadAllDropData(){
+  for(let i=0; i<m_DropDataList.length(); i++){
+    let curDrop = m_DropDataList[i];
+    let sessionDropData = sessionStorage.getItem(curDrop.name);
+    if(sessionDropData != null)
+    {
+      // Drop data exists locally
+      curDrop.chartData = sessionDropData;
+    } else {
+      //no drop data exists, data is stored in order of drops so if drop n's data
+      // doesn't exist then neither does n+1 .... Load the rest of the drop's data
+      ajaxLoadAllDropData(curDrop, i);
+    }
+  }
 }
 
 // TODO: save it to local storage
@@ -197,6 +219,9 @@ function ajaxLoadAllDropData(drop, indexNum) {
     //Plot data
     let magnitudeData = parseData(data);
     drop.chartData = magnitudeData;
+    
+    //Store data locally
+    sessionStorage.setItem(drop.name, drop.chartData);
 
     if(indexNum == m_DropDataList.length-1){
       //Hide the loading screen on completion of all requests
@@ -375,7 +400,6 @@ function buildChart(resultData) {
             },
             xAxis: {
                 // max: 500    //Set the max points in the view
-                            //TODO: Set scroll bar to far right
             },
             yAxis: {
                 title: {
