@@ -1,6 +1,5 @@
 //List all drops history
 let m_DropDataList = [];
-// let m_currentChart; //Current chart in view
 let m_activeDropIndex; //Index of the active tab
 
 // For production with egg
@@ -10,14 +9,14 @@ let urlEndPoint = "/functions";
 
 $(document).ready(function() {
 	//setup
-	//TODO: Put into on load complete method
 	// Hide the stop button on load
 	$("#stop").hide();
 	$("#loading-btn").hide();
 
 	//TODO: only disable if no runs exist
-	$("#download-btn").hide();
-  $("#main-content").hide();
+  $("#download-btn").hide();
+  $("#loading").hide();
+  // $("#main-content").hide();
 	//TODO: update drop list on load
 	updateDropList();
 
@@ -48,7 +47,7 @@ function ajaxStartRecord(){
       console.log(response);
       if(response != 0 ){
         //bad record force start and alert
-        alert("Bad Record, forcing stop");
+        alert("Error with egg record, forcing stop. Try a different drop.");
         HTTPRequest(urlEndPoint+"/recordStop", function(response) {
           console.log("recordStop Status: " + response);
         });
@@ -59,6 +58,7 @@ function ajaxStartRecord(){
   })
 }
 
+// Stop the data then plot it on the graph
 function stopRecord() {
   //Disable and show loading of stop button
   $("#stop").prop("disabled", true).addClass("is-loading");;
@@ -81,6 +81,7 @@ function ajaxStopRecord(){
   });
 }
 
+// TODO: change to foce data and no longer need to parse
 // Ajax request to get and plot the data
 function ajaxGetDropData() {
   let curDrop = m_DropDataList[m_activeDropIndex]
@@ -108,6 +109,8 @@ function ajaxGetDropData() {
   });
 }
 
+// Creates a hidden link and opens it to download the drop's data
+// as a CSV file
 function downloadCsv(){
   let curDrop = m_DropDataList[m_activeDropIndex]
   // split the comma sep data to insert new lines instead
@@ -174,39 +177,20 @@ function createDrop(name, valuesArray){
 }
 
 //Pull all existing drop names from the egg and populate the tabs with them
-//TODO: Show loading screen
 function updateDropList() { 
-	//Get all Drops from API
-  ajaxUpdateDropList();
-
-  //load all the data up front for each one
-  for(let i=0; i<m_DropDataList.length; i++){
-    let curDrop = m_DropDataList[i];
-    ajaxSimpleGetData(curDrop, i);
-  }
+  //Get all Drops from API
+  ajaxUpdateDropList().then(ajaxLoadAllDropData);  
 }
 
 // TODO: save it to local storage
-function ajaxSimpleGetData(drop, indexNum) {
+function ajaxLoadAllDropData(drop, indexNum) {
   let getDataUrl = urlEndPoint+"/recordGetAxes/" + drop.name;
 
   //TODO: Do this better
-  //Hide the loading screen on completion of all requests
-  if(indexNum == m_DropDataList.length){
-    $("#loading").hide();
-    $("#main-content").show();
-  }
   return $.ajax({
     dataType: 'text',
     url: getDataUrl
   }).done(function(data) {
-     //TODO: Do this better
-    //Hide the loading screen on completion of all requests
-    if(indexNum == m_DropDataList.length){
-      $("#loading").hide();
-      $("#main-content").show();
-    }
-
     // If successful
     console.log("data retrieved: " + data);
 
@@ -214,6 +198,14 @@ function ajaxSimpleGetData(drop, indexNum) {
     let magnitudeData = parseData(data);
     drop.chartData = magnitudeData;
 
+    if(indexNum == m_DropDataList.length-1){
+      //Hide the loading screen on completion of all requests
+      $("#loading").hide();
+      $("#main-content").show();
+    } else {
+      // Load next drop's data
+      ajaxLoadAllDropData(m_DropDataList[indexNum+1], indexNum+1);
+    }
   }).fail(function(jqXHR, textStatus, errorThrown) {
     // If fail
     console.log(textStatus + ': ' + errorThrown);
@@ -229,15 +221,15 @@ function ajaxUpdateDropList() {
     }).done(function(response) {
       // remove new line chars from right
       response.trimRight();
-    //Check that names exist to avoid adding empty tabs
-    console.log("recordList:\n" + response);
-    if(response != ""){
-      let dropNames = response.split('\n');
-      for(let i=0; i<dropNames.length; i++){
-        // Add a drop and a tab with no data because it hasn't been pulled yet
-        addDrop(dropNames[i], []);
+      //Check that names exist to avoid adding empty tabs
+      console.log("recordList:\n" + response);
+      if(response != ""){
+        let dropNames = response.split('\n');
+        for(let i=0; i<dropNames.length; i++){
+          // Add a drop and a tab with no data because it hasn't been pulled yet
+          addDrop(dropNames[i], []);
+        }
       }
-    }
     }).fail(function(jqXHR, textStatus, errorThrown) {
       // If fail
       console.log(textStatus + ': ' + errorThrown);
