@@ -4,123 +4,118 @@
   <head>
     <title>Digital Egg Drop Page</title>
     <link rel="stylesheet" href="./font-awesome.min.css">
+    <link rel="stylesheet" href="./stylesheet.css">
+    <link rel="stylesheet" href="./loading-style.css">
     <script src="./jquery.min.js"></script>
     <script src="./highstockchart.min.js"></script>
   </head>
   <style>
-    .custom-container {
-      min-width: 600px;
-      height: 400px;
-      margin: 0 auto;
-      margin-top: 20px;
-      margin-left: 20px;
-      margin-right: 20px;
-    }
-
-    .form-label {
-      font-weight: bold;
-      font-size: 18px;
-    }
-
-
-    /* Top Right corner Button placement for Delete Drop button */
-    #delete-button {
-     margin-top: 1px;
-     margin-right: 2px;
-     float:right;
-     top:0;
-     right:0;
-    }
-
-    /* Class for elements hidden on load */
-    .hide-by-default {
-      display: none;
-    }
+    
 
 
 </style>
   <body>
-    <section class="hero is-primary">
-        <div class="hero-body">
-          <div class="container">
-            <h1 class="title">
-              Welcome to the egg drop page!
-            </h1>
-            <h2 class="subtitle">
-              <p>Here is how this currently works...
-                <ul>
-                  <li>1. Create a drop</li>
-                  <li>2. Selet the newly created drop tab </li>
-                  <li>3. Select the start recording button to start recording a drop</li>
-                  <li>4. Select "Stop Recording" to stop recording the drop</li>
-                  <li>5. The graph will automatically start downloading the drop
-                    data. This may take a few seconds.
-                  </li>
-
-                </ul>
-              </p>
-            </h2>
-              <p> 
-                <div class="field has-addons">
-                  <div class="control">
-                    <input id="drop-name" class="input" type="text" placeholder="Drop Name">
-                  </div>
-                  <div class="control">
-                    <button class="button is-info" onclick="addNewDrop()">
-                      Create a Drop!
-                    </button>
-                  </div>
-                </div>
-              </p>
-          </div>
+    <div id="loading">
+      <div class="columns is-mobile is-centered">
+        <div class="column is-narrow">
+         <p id="loading-text">Loading Eggcellent Data...</p>
         </div>
+      </div>
 
-        <!-- Drop history Tabs -->
-        <div class="hero-foot">
-          <nav class="tabs is-boxed is-fullwidth">
+      <div class="spinner">
+          <div class="rect1"></div>
+          <div class="rect2"></div>
+          <div class="rect3"></div>
+          <div class="rect4"></div>
+          <div class="rect5"></div>
+        </div>
+    </div> <!-- End Loading -->
+
+    <div id="main-content">
+      <section class="hero is-primary">
+          <div class="hero-body">
             <div class="container">
-              <ul id="drop-history">
-                <!-- drop name List elements here -->
-              </ul>
-            </div>
-          </nav>
-        </div>
-      </section>
+              <h1 class="title">
+                Welcome to the egg drop page!
+              </h1>
+              <h2 class="subtitle">
+                <p>Here is how this currently works...
+                  <ul>
+                    <li>1. Create a drop</li>
+                    <li>2. Selet the newly created drop tab </li>
+                    <li>3. Select the start recording button to start recording a drop</li>
+                    <li>4. Select "Stop Recording" to stop recording the drop</li>
+                    <li>5. The graph will automatically start downloading the drop
+                      data. This may take a few seconds.
+                    </li>
 
-        <div id="drop-details-container" class="custom-container hide-by-default">
-          <button id="delete-button" class="delete is-medium" onclick="openConfirmDeleteDialog()">Delete Drop</button>
-
-          <div class="columns">
-            <div class="column is-12">
-              <nav class="level">
-                <p class="level-item has-text-centered">
-                    <button id="record" type="button" class="button is-success" onclick="startRecord()">Start Recording</button>
-                    <button id="stop" type="button" class="button is-danger" onclick="stopRecord()">Stop Recording</button>
-                    <button id="loading-btn" type="submit" class="button is-info is-loading">Loading...</button> 
-                    <button id="download-btn" type="submit" class="button is-info" onclick="downloadCsv()">Download CSV</button> 
+                  </ul>
                 </p>
-              </nav>
- 
+              </h2>
+                <p> 
+                  <div class="field has-addons">
+                    <div class="control">
+                      <input id="drop-name" class="input" type="text" placeholder="Drop Name">
+                    </div>
+                    <div class="control">
+                      <button class="button is-info" onclick="addNewDrop()">
+                        Create a Drop!
+                      </button>
+                    </div>
+                  </div>
+                </p>
             </div>
           </div>
 
-          <!-- Chart Columns -->
-          <div class="columns">
-            <div class="column is-12">
-              <nav class="level">
-                <p id="charting-container" class="level-item has-text-centered">
-                  <!-- Chart's Column -->        
-                  <!-- Charting section -->
-                  <div><div ></div></div>
-                  
-                </p>
-              </nav>
+          <!-- Drop history Tabs -->
+          <div class="hero-foot">
+            <nav class="tabs is-boxed is-fullwidth">
+              <div class="container">
+                <ul id="drop-history">
+                  <!-- drop name List elements here -->
+                </ul>
+              </div>
+            </nav>
+          </div>
+        </section>
+
+          <div id="drop-details-container" class="custom-container hide-by-default">
+            <button id="delete-button" class="delete is-medium" onclick="openConfirmDeleteDialog()">Delete Drop</button>
+
+            <div class="columns">
+              <div class="column is-12">
+                <nav class="level">
+                  <p class="level-item has-text-centered">
+                      <button id="record" type="button" class="button is-success" onclick="startRecord()">Start Recording</button>
+                      <button id="stop" type="button" class="button is-danger" onclick="stopRecord()">Stop Recording</button>
+                      <button id="loading-btn" type="submit" class="button is-info is-loading">Loading...</button> 
+                      <button id="download-btn" type="submit" class="button is-info" onclick="downloadCsv()">Download CSV</button> 
+                  </p>
+                </nav>
+  
+              </div>
             </div>
-          </div> <!-- End Chart's Row -->
 
-<!-- Delete Confirmation Modal -->
-<div id="modal-area">
+            <!-- Chart Columns -->
+            <div class="columns">
+              <div class="column is-12">
+                <nav class="level">
+                  <p id="charting-container" class="level-item has-text-centered">
+                    <!-- Chart's Column -->        
+                    <!-- Charting section -->
+                    <div><div ></div></div>
+                    
+                  </p>
+                </nav>
+              </div>
+            </div> <!-- End Chart's Row -->
 
+      <!-- Delete Confirmation Modal -->
+      <div id="modal-area">
+
+      </div>
+
+    </div>
 </div>
 
 

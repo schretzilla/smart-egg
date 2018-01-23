@@ -17,7 +17,7 @@ $(document).ready(function() {
 
 	//TODO: only disable if no runs exist
 	$("#download-btn").hide();
-
+  $("#main-content").hide();
 	//TODO: update drop list on load
 	updateDropList();
 
@@ -128,14 +128,12 @@ function downloadCsv(){
 
 }
 
+//TODO: Delete from local storage
 //Delete the drop on confirmed delete
 function deleteDrop(){
   // TODO: confirm delte works
   let dropName = m_DropDataList[m_activeDropIndex].name;
-	// HTTPRequest(urlEndPoint+"/recordDelete/"+dropName, function(response) {});
   ajaxDeleteDrop();
-  //TDODO currently deletes all... dont do that
-   // HTTPRequest("/functions/recordDeleteAll", function(response) {});
 
    // Remove tab of item 
    $("#Drop-"+dropName).remove();
@@ -176,6 +174,7 @@ function createDrop(name, valuesArray){
 }
 
 //Pull all existing drop names from the egg and populate the tabs with them
+//TODO: Show loading screen
 function updateDropList() { 
 	//Get all Drops from API
   ajaxUpdateDropList();
@@ -183,17 +182,31 @@ function updateDropList() {
   //load all the data up front for each one
   for(let i=0; i<m_DropDataList.length; i++){
     let curDrop = m_DropDataList[i];
-    ajaxSimpleGetData(curDrop);
+    ajaxSimpleGetData(curDrop, i);
   }
 }
 
-function ajaxSimpleGetData(drop) {
+// TODO: save it to local storage
+function ajaxSimpleGetData(drop, indexNum) {
   let getDataUrl = urlEndPoint+"/recordGetAxes/" + drop.name;
 
+  //TODO: Do this better
+  //Hide the loading screen on completion of all requests
+  if(indexNum == m_DropDataList.length){
+    $("#loading").hide();
+    $("#main-content").show();
+  }
   return $.ajax({
     dataType: 'text',
     url: getDataUrl
   }).done(function(data) {
+     //TODO: Do this better
+    //Hide the loading screen on completion of all requests
+    if(indexNum == m_DropDataList.length){
+      $("#loading").hide();
+      $("#main-content").show();
+    }
+
     // If successful
     console.log("data retrieved: " + data);
 
@@ -207,14 +220,15 @@ function ajaxSimpleGetData(drop) {
   });
 }
 
+//TODO: Add to local storage
 function ajaxUpdateDropList() {
   let requestStr = urlEndPoint+"/recordList"
   return  $.ajax({
       dataType: 'text',
       url: requestStr
     }).done(function(response) {
-    response = devToPrdResponseConverter(response);
-
+      // remove new line chars from right
+      response.trimRight();
     //Check that names exist to avoid adding empty tabs
     console.log("recordList:\n" + response);
     if(response != ""){
@@ -232,7 +246,6 @@ function ajaxUpdateDropList() {
 
 // Adds a drop to the drop list and the tabs
 function addDrop(dropName, data) {
-
   let eggDrop = {id: m_DropDataList.length, name: dropName, chartData: data };
   m_DropDataList.push(eggDrop);
   this.addTab(eggDrop.id, dropName);
@@ -306,7 +319,7 @@ function newDataSelected(dropId){
 
     //Hide start button if the drop has already been recorded
     if(selectedData.length == 0 ){
-      ajaxGetDropData
+      // ajaxGetDropData
 
       // No data has been cached for this drop
       $("#record").show();
